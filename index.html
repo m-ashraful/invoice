@@ -754,9 +754,75 @@ function ownerKey() { try { return localStorage.getItem("owner-key") || ""; } ca
 function needKey(err, retry) {
   const m = String(err && err.message || err);
   if (m.indexOf("OWNER_KEY") < 0) return false;
-  const k = prompt(m.replace(/^.*OWNER_KEY:\s*/, "") + "\n(Master → 🔑 Dashboard password-এ যেটা সেট করেছেন)");
-  if (k && k.trim()) { try { localStorage.setItem("owner-key", k.trim()); } catch (e) {} if (retry) retry(); }
+  askOwnerKey(m.replace(/^.*OWNER_KEY:\s*/, ""), retry);
   return true;
+}
+// Dashboard password-এর কার্ড — PIN লক স্ক্রিনের মতো (ব্রাউজারের সাদামাটা prompt-এর বদলে)।
+// একসাথে কয়েকটা ডাক password চাইলে কার্ড একবারই আসে; password দিলে সবগুলো আবার চলে।
+let KEY_WAIT = null;
+function askOwnerKey(msg, retry) {
+  if (KEY_WAIT) {
+    if (retry) KEY_WAIT.push(retry);
+    const e = document.getElementById("okErr"); if (e && msg) e.textContent = msg;
+    return;
+  }
+  KEY_WAIT = retry ? [retry] : [];
+  const first = !ownerKey();   // আগে কখনো দেওয়া হয়নি = প্রথমবার; নইলে আগেরটা আর মিলছে না
+  const box = document.createElement("div");
+  box.id = "okBox";
+  box.innerHTML = `<style>
+#okBox{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;
+  background:radial-gradient(circle at 20% 15%,#4b3fd6 0,transparent 45%),radial-gradient(circle at 85% 90%,#b8336a 0,transparent 40%),rgba(20,18,43,.97);
+  font-family:'Hind Siliguri','Nirmala UI','Segoe UI',system-ui,sans-serif}
+#okBox *{box-sizing:border-box}
+#okBox .ok-card{width:100%;max-width:360px;margin:auto;background:#fff;color:#1a1a2e;border-radius:22px;padding:26px 22px 20px;
+  box-shadow:0 24px 60px rgba(0,0,0,.45);text-align:center;animation:okIn .3s ease-out}
+@keyframes okIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+#okBox .ok-ico{width:64px;height:64px;margin:0 auto 12px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:30px;
+  background:linear-gradient(135deg,#6c5ce7,#a55eea);box-shadow:0 8px 22px rgba(108,92,231,.4)}
+#okBox .ok-t{font-size:20px;font-weight:800;margin:0 0 4px}
+#okBox .ok-s{font-size:13px;font-weight:600;color:#6b6b85;line-height:1.55;margin:0 0 16px}
+#okBox label{display:block;text-align:left;font-size:12.5px;font-weight:800;color:#444;margin:0 0 5px}
+#okBox input{display:block;width:100%;margin:0;padding:12px 14px;border:2px solid #e1e5f0;border-radius:12px;font:inherit;font-size:17px;
+  font-weight:700;color:#1a1a2e;background:#fff;outline:none}
+#okBox input:focus{border-color:#6c5ce7;box-shadow:0 0 0 3px rgba(108,92,231,.15)}
+#okBox .ok-btn{display:block;width:100%;margin:12px 0 0;padding:13px;border:none;border-radius:12px;cursor:pointer;font:inherit;font-size:15px;
+  font-weight:800;color:#fff;background:linear-gradient(135deg,#6c5ce7,#4a3fc4);box-shadow:0 6px 18px rgba(108,92,231,.35)}
+#okBox .ok-err{min-height:18px;margin:10px 0 0;font-size:13px;font-weight:700;color:#c0392b;line-height:1.5}
+#okBox .ok-row{display:flex;justify-content:space-between;gap:10px;margin-top:10px}
+#okBox .ok-link{background:none;border:none;padding:4px 0;cursor:pointer;font:inherit;font-size:12.5px;font-weight:700;color:#4a3fc4}
+#okBox .ok-foot{margin-top:14px;font-size:11.5px;font-weight:600;color:#9a97b5;line-height:1.5}
+</style>
+<form class="ok-card" autocomplete="off" novalidate>
+  <div class="ok-ico">🔑</div>
+  <div class="ok-t">Dashboard Password</div>
+  <div class="ok-s">${first ? "এই ব্রাউজারে প্রথমবার — একবার দিলে এখানে আর চাইবে না।" : "আগের password আর মিলছে না — নতুনটা দিন।"}</div>
+  <label for="okIn">Password</label>
+  <input id="okIn" type="password" autocomplete="current-password">
+  <button class="ok-btn" type="submit">ঢুকুন</button>
+  <div class="ok-err" id="okErr">${first ? "" : esc(msg)}</div>
+  <div class="ok-row">
+    <button class="ok-link" type="button" id="okEye">👁 দেখাও</button>
+    <button class="ok-link" type="button" id="okCancel">বাতিল</button>
+  </div>
+  <div class="ok-foot">Master → 🔑 Dashboard password বা ⚙️ ম্যানেজ → সেটিংস-এ যেটা সেট করেছেন</div>
+</form>`;
+  document.body.appendChild(box);
+  const inp = box.querySelector("#okIn");
+  setTimeout(() => inp.focus(), 60);
+  const close = () => { box.remove(); const w = KEY_WAIT || []; KEY_WAIT = null; return w; };
+  box.querySelector("#okEye").onclick = function () {
+    const show = inp.type === "password"; inp.type = show ? "text" : "password";
+    this.textContent = show ? "🙈 লুকাও" : "👁 দেখাও"; inp.focus();
+  };
+  box.querySelector("#okCancel").onclick = () => { close(); };
+  box.querySelector("form").onsubmit = e => {
+    e.preventDefault();
+    const k = inp.value.trim();
+    if (!k) { box.querySelector("#okErr").textContent = "Password লিখুন।"; inp.focus(); return; }
+    try { localStorage.setItem("owner-key", k); } catch (x) {}
+    close().forEach(f => f());   // ভুল হলে সার্ভার আবার OWNER_KEY দেবে — কার্ড আবার আসবে, লাল লেখাসহ
+  };
 }
 const NF = new Intl.NumberFormat("en-IN");
 const tk = n => "৳" + NF.format(Math.round(n || 0));
