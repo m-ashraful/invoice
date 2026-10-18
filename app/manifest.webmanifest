@@ -1,6 +1,6 @@
 {
-  "name": "Invoice — Technique Publication",
-  "short_name": "Invoice",
+  "name": "Retailer Invoice · Invoice App — Technique Publication",
+  "short_name": "Invoice App",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

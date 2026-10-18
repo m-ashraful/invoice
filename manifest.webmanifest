@@ -1,6 +1,6 @@
 {
-  "name": "Retailer Dashboard — Technique Publication",
-  "short_name": "Retailer Dashboard",
+  "name": "Retailer Invoice — Technique Publication",
+  "short_name": "Retailer Invoice",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

@@ -26,7 +26,7 @@ var API_URL='https://script.google.com/macros/s/AKfycbxMlXzBZ5n3fIzLDq9dCla3CGNT
 </script>
 <script>(function(){var m=/[?&]page=(invoice|staff)\b/.exec(location.search);if(m)location.replace(m[1]==='invoice'?'app/':'staff/');})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Retailer Dashboard</title>
+<title>Retailer Invoice</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icon-dashboard.png">
 <link rel="apple-touch-icon" href="icon-dashboard.png">
@@ -410,6 +410,60 @@ a.act{text-decoration:none;color:inherit}
 .mg-link{display:flex;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--line);font-size:13.5px}
 .mg-link:first-child{border-top:0}
 .mg-link .u{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-3);font-family:var(--num);font-size:12.5px}
+
+/* ══ Admin প্যানেলের চেহারা ═══════════════════════════════════════════
+   কম্পিউটারে (≥1024px): বাঁয়ে সাইডবার (প্রতিষ্ঠান, মেনু, নতুন Invoice), ডানে পাতা —
+   উপরে পরিষ্কার শিরোনামের সারি, তার নিচে সময়/ফিল্টার, তারপর কার্ডগুলো। ফোনে আগের মতো নিচের ট্যাব বার। */
+.side{display:none}
+.vsub{display:none}
+@media (min-width:1024px){
+  :root{--side:264px}
+  body{padding-left:var(--side)}
+  .side{display:flex;flex-direction:column;gap:2px;position:fixed;left:0;top:0;bottom:0;width:var(--side);z-index:40;
+    padding:18px 14px 14px;overflow-y:auto;color:#dfe4f3;
+    background:radial-gradient(120% 60% at 0% 0%,rgba(76,110,245,.28),transparent 60%),
+      radial-gradient(90% 50% at 100% 100%,rgba(212,180,131,.18),transparent 60%),linear-gradient(180deg,#121a33,#0c1226)}
+  .sb-brand{display:flex;align-items:center;gap:11px;padding:4px 6px 18px;margin-bottom:10px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .sb-mono{width:42px;height:42px;border-radius:13px;flex:none;display:grid;place-items:center;font-family:var(--num);font-weight:700;
+    font-size:15px;letter-spacing:.04em;color:#fff;background:linear-gradient(135deg,#d4b483,#b08d57);box-shadow:0 6px 16px rgba(176,141,87,.35)}
+  .sb-names{min-width:0}
+  .sb-names b{display:block;font-size:15px;line-height:1.25;color:#fff;font-weight:700}
+  .sb-names span{display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#d4b483;font-family:var(--num);font-weight:600;margin-top:2px}
+  .sb-new{display:flex;align-items:center;justify-content:center;gap:8px;margin:2px 2px 14px;padding:11px 12px;border-radius:12px;
+    font-weight:600;font-size:14px;color:#fff;background:linear-gradient(135deg,#2f9e44,#1e8a5a);box-shadow:0 8px 20px rgba(47,158,68,.3)}
+  .sb-new svg{width:16px;height:16px}
+  .sb-lbl{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(223,228,243,.45);font-weight:600;
+    font-family:var(--num);margin:12px 10px 6px}
+  .sb-it{display:flex;align-items:center;gap:11px;width:100%;padding:10px 12px;border-radius:11px;font-size:14.5px;font-weight:500;
+    color:rgba(223,228,243,.78);text-decoration:none;text-align:left;transition:background .15s,color .15s}
+  .sb-it svg{width:19px;height:19px;flex:none;opacity:.85}
+  .sb-it:hover{background:rgba(255,255,255,.06);color:#fff}
+  .sb-it.on{background:linear-gradient(90deg,rgba(76,110,245,.32),rgba(76,110,245,.08));color:#fff;box-shadow:inset 3px 0 0 #d4b483}
+  .sb-it.on svg{color:#d4b483;opacity:1}
+  .sb-ext{margin-left:auto;font-size:12px;opacity:.6}
+  .sb-foot{margin-top:auto;padding:14px 8px 2px;border-top:1px solid rgba(255,255,255,.08);font-size:11.5px;line-height:1.55;color:rgba(223,228,243,.45)}
+  .sb-upd{color:rgba(223,228,243,.7);margin-bottom:4px}
+
+  /* উপরের সারি — হালকা কাচের মতো, পাতার শিরোনাম + ছোট বর্ণনা + কাজের বোতাম */
+  .top{background:color-mix(in srgb,var(--bg) 82%,transparent) !important;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    color:var(--ink);padding:18px 0 14px !important;border-bottom:1px solid var(--line)}
+  .top::after{display:none}
+  .wrap{max-width:1320px;padding:0 28px}
+  .eyebrow{color:var(--ink-3);letter-spacing:.14em}
+  .title{color:var(--ink);font-size:26px}
+  .vsub{display:block;font-size:13px;color:var(--ink-3);margin-top:2px}
+  .updated,.tabbar,[data-view="manage"].icon-btn,#invAppLink{display:none !important}
+  .icon-btn{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+  .icon-btn:hover{background:var(--surface-2)}
+  .filterbar{margin-top:14px;top:var(--toph,80px);background:var(--bg);padding:0 28px 10px}
+  .filterbar .fb-inner{flex-direction:row;align-items:center;gap:12px}
+  .filterbar .chips{flex:1}
+  .mg-nav{margin:-16px -28px 10px;padding:12px 28px 10px}
+  main{padding-top:18px;padding-bottom:30px}
+  .fab{display:none !important}   /* সাইডবারে "নতুন" বোতাম আছে */
+  .toast{left:calc(50% + var(--side) / 2)}
+  .sheet{left:calc(50% + var(--side) / 2)}
+}
 </style>
 </head>
 <body>
@@ -472,7 +526,7 @@ a.act{text-decoration:none;color:inherit}
 <form class="al-card" id="alForm" autocomplete="off" novalidate>
   <img class="al-logo" id="alLogo" src="logo.png" alt="logo"><div class="al-ico" id="alIco" style="display:none">🔒</div>
   <div class="al-org">Technique Publication</div>
-  <div class="al-app">Retailer Dashboard</div>
+  <div class="al-app">Retailer Invoice</div>
   <div class="al-sub" id="alSub"></div>
   <div class="al-f" id="alFa"><label for="alA" id="alLa"></label><input class="al-in" id="alA" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
   <div class="al-f" id="alFb"><label for="alB" id="alLb"></label><input class="al-in" id="alB" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
@@ -627,12 +681,35 @@ a.act{text-decoration:none;color:inherit}
 </div>
 
 
+<!-- কম্পিউটারে বাঁয়ের সাইডবার (ফোনে লুকানো — সেখানে নিচের ট্যাব বার) -->
+<aside class="side" aria-label="মেনু">
+  <div class="sb-brand">
+    <div class="sb-mono" id="sbMono">TP</div>
+    <div class="sb-names"><b id="sbCo">Technique Publication</b><span>Retailer Invoice</span></div>
+  </div>
+  <button class="sb-new" id="sbNew" hidden onclick="document.getElementById('payFab').click()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>নতুন Invoice / Payment</button>
+  <div class="sb-lbl">মূল</div>
+  <button class="sb-it on" data-view="overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg>সংক্ষিপ্ত চিত্র</button>
+  <button class="sb-it" data-view="retailers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l1.5-5h15L21 9"/><path d="M4 9v11h16V9"/><path d="M3 9h18"/><path d="M9 20v-6h6v6"/></svg>Retailer</button>
+  <button class="sb-it" data-view="products"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>বই বিক্রি</button>
+  <button class="sb-it" data-view="invoices"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>Invoice</button>
+  <div class="sb-lbl">সিস্টেম</div>
+  <button class="sb-it" data-view="manage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>ম্যানেজ</button>
+  <a class="sb-it" id="sbInvApp" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 12v6M9 15h6"/></svg>Invoice App<span class="sb-ext">↗</span></a>
+  <div class="sb-foot">
+    <div class="sb-upd" id="sbUpdated"></div>
+    <div>Technique Publication · Retailer Invoice</div>
+  </div>
+</aside>
+
 <header class="top">
   <div class="wrap">
     <div class="top-row">
       <div style="min-width:0">
         <div class="eyebrow" id="company">Retailer Dashboard</div>
         <h1 class="title" id="viewTitle">সংক্ষিপ্ত চিত্র</h1>
+        <div class="vsub" id="viewSub"></div>
       </div>
       <div style="display:flex;gap:8px">
         <a class="icon-btn inv-app" id="invAppLink" hidden aria-label="Invoice App" title="Invoice App (আলাদা)">
@@ -870,6 +947,9 @@ const PERIODS = [
   ["thisYear", "এই বছর"], ["all", "সব সময়"], ["custom", "কাস্টম"]
 ];
 const VIEW_TITLES = { overview: "সংক্ষিপ্ত চিত্র", retailers: "Retailer", products: "বই বিক্রি", invoices: "Invoice", manage: "ম্যানেজ" };
+// কম্পিউটারে পাতার শিরোনামের নিচে ছোট বর্ণনা
+const VIEW_SUBS = { overview: "বিক্রি, আদায় ও বাকির এক নজরে হিসাব", retailers: "প্রতিটা দোকানের বিক্রি, বাকি ও যোগাযোগ",
+  products: "কোন বই কত বিক্রি হলো", invoices: "সব Invoice ও ফেরত — খুঁজুন, সংশোধন বা বাতিল", manage: "Retailer, বই, Discount, Staff, সেটিংস ও টুলস" };
 const S = Object.assign({
   period: "thisMonth", from: "", to: "", retailers: [], products: [], type: "all",
   view: "overview", rSort: "sales", rQ: "", pQ: "", iQ: "", iLimit: 40
@@ -898,7 +978,11 @@ function showApp() {
   $("#payFab").hidden = false;
   $("#payTab").hidden = false;
   // আলাদা Invoice App — একই লিংকের শেষে ?page=invoice
-  if (D.appUrl) { const a = $("#invAppLink"); a.href = invoiceAppUrl(); a.hidden = false; }
+  if (D.appUrl) {
+    const a = $("#invAppLink"); a.href = invoiceAppUrl(); a.hidden = false;
+    const s = $("#sbInvApp"); s.href = invoiceAppUrl(); s.hidden = false;
+  }
+  $("#sbNew").hidden = false;
   $("#tabbar").classList.add("five");
   render();
 }
@@ -1041,10 +1125,14 @@ function selectedRetailers() {
 /* ═══════════════ Render ═══════════════ */
 function render() {
   if (!D) return;
-  $("#company").textContent = D.company || "Retailer Dashboard";
+  $("#company").textContent = (D.company || "Technique Publication") + " · Retailer Invoice";
+  $("#sbCo").textContent = D.company || "Technique Publication";
+  $("#sbMono").textContent = String(D.company || "Technique Publication").split(/\s+/).map(w => w.charAt(0)).join("").slice(0, 2).toUpperCase();
   $("#updated").textContent = D.refreshedAt ? `শেষ হালনাগাদ: ${D.refreshedAt}` : "";
+  $("#sbUpdated").textContent = D.refreshedAt ? `শেষ হালনাগাদ: ${D.refreshedAt}` : "";
   $("#viewTitle").textContent = VIEW_TITLES[S.view];
-  document.querySelectorAll(".tab").forEach(b => b.classList.toggle("on", b.dataset.view === S.view));
+  $("#viewSub").textContent = VIEW_SUBS[S.view] || "";
+  document.querySelectorAll(".tab,.sb-it[data-view]").forEach(b => b.classList.toggle("on", b.dataset.view === S.view));
   document.querySelectorAll(".view").forEach(v => v.classList.toggle("on", v.id === "v-" + S.view));
   renderFilterBar();
   $(".filterbar").hidden = S.view === "manage"; // সময়/ফিল্টার ম্যানেজে লাগে না
